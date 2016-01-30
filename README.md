@@ -22,7 +22,7 @@ Huawei E3276 LTE Modem (IMEI: 861711012616361)
   Connection status: Connected
     Network type: W-CDMA (3G)
     Signal level: ***** (92%)
-    Roaming: enabled
+    Roaming: Enabled
     Modem WAN IP address: 10.197.32.60
     Public IP address: 32.131.81.221
     DNS IP addresses: 212.113.0.4, 66.28.0.61
