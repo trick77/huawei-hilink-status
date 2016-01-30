@@ -18,7 +18,7 @@ Huawei E3276 LTE Modem (IMEI: 861711012616361)
   Hardware version: CH2F4276GM
   Software version: 22.250.04.00.186
   Serial: B3A3TC2313833197
-  MAC address (Modem): 00:0D:87:22:34:AC
+  MAC address (modem): 00:0D:87:22:34:AC
   Connection status: Connected
     Network type: W-CDMA (3G)
     Signal level: ***** (92%)

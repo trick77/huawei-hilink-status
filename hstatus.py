@@ -188,7 +188,7 @@ def print_device_info(device_ip):
     print('  Hardware version: ' + hardware_version) 
     print('  Software version: ' + software_version)
     print('  Serial: ' + serial_number)
-    print('  MAC address (Modem): ' + mac_address1, end='')
+    print('  MAC address (modem): ' + mac_address1, end='')
     if mac_address2 is not None:
         print('\tMAC address (WiFi): ' + mac_address2)
     else:
