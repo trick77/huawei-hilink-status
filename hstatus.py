@@ -106,9 +106,9 @@ def get_network_type(type):
 def get_roaming_status(status):
     result = 'n/a'
     if status == '0':
-        result = 'disabled'
+        result = 'Disabled'
     elif status == '1':
-        result = 'enabled'
+        result = 'Enabled'
     return result
 
 def get_signal_level(level):
