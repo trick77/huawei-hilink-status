@@ -41,13 +41,13 @@ def get_connection_status(status):
     result = 'n/a'
     if status == '2' or status == '3' or status == '5' or status == '8' or status == '20' or status == '21' or status == '23' or status == '27' or status == '28' or status == '29' or status == '30' or status == '31' or status == '32' or status == '33':
         result = 'Connection failed, the profile is invalid'
-    if status == '7' or status == '11' or status == '14' or status == '37': 
+    elif status == '7' or status == '11' or status == '14' or status == '37': 
         result = 'Network access not allowed'
-    if status == '12' or status == '13':
+    elif status == '12' or status == '13':
         result = 'Connection failed, roaming not allowed'
-    if status == '201':
+    elif status == '201':
         result = 'Connection failed, bandwidth exceeded'
-    if status == '900':
+    elif status == '900':
         result = 'Connecting'
     elif status == '901':
         result = 'Connected'
