@@ -17,11 +17,25 @@ def to_size(size):
    s = round(size/p,2)
    return '%s %s' % (s,size_name[i])
 
+
+def is_hilink(device_ip):
+    r = requests.get('http://' + device_ip + '/api/device/information')
+    if r.status_code != 200:
+        return False
+    d = xmltodict.parse(r.text, xml_attribs=True)
+    if 'error' in d:
+        return False;
+    return True
+
 def call_api(device_ip, resource, xml_attribs=True):
     r = requests.get('http://' + device_ip + resource)
     if r.status_code == 200:
-    	return xmltodict.parse(r.text, xml_attribs=xml_attribs)
-    raise Exception('Received status code ' + str(r.status_code) + ' for URL ' + r.url)     
+    	d = xmltodict.parse(r.text, xml_attribs=xml_attribs)
+        if 'error' in d:
+            raise Exception('Received error code ' + d['error']['code'] + ' for URL ' + r.url)
+        return d
+    else:
+      raise Exception('Received status code ' + str(r.status_code) + ' for URL ' + r.url)     
 
 def get_connection_status(status):
     result = 'n/a'
@@ -197,6 +211,11 @@ device_ip = '192.168.1.1'
 if len(sys.argv) == 2:
     device_ip = sys.argv[1]
   
+if not is_hilink(device_ip):
+    print("Can't find a Huawei HiLink device on " + device_ip)
+    print('')
+    sys.exit(-1)
+
 print_device_info(device_ip)
 connection_status = print_connection_status(device_ip)
 print_provider(device_ip, connection_status)
