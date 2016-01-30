@@ -162,7 +162,7 @@ def print_connection_status(device_ip):
     print('  Connection status: ' + get_connection_status(connection_status))
     if connection_status == '901':
         print('    Network type: ' + get_network_type(network_type))
-        print('    Signal Level: ' + get_signal_level(signal_level) + ' (' + signal_strength + '%)')
+        print('    Signal level: ' + get_signal_level(signal_level) + ' (' + signal_strength + '%)')
         print('    Roaming: ' + get_roaming_status(roaming_status))
     if wan_ip is not None:
         print('    Modem WAN IP address: ' +  wan_ip)
