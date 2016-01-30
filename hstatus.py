@@ -11,7 +11,7 @@ import math
 def to_size(size):
    if (size == 0):
        return '0 B'
-   size_name = ('KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
+   size_name = (' Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
    i = int(math.floor(math.log(size,1024)))
    p = math.pow(1024,i)
    s = round(size/p,2)
