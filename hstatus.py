@@ -199,7 +199,7 @@ def print_provider(device_ip, connection_status):
     state = d['response']['State']
     provider_name = d['response']['FullName']
     if connection_status == '901':
-        print('    Network provider: ' + provider_name)
+        print('    Network operator: ' + provider_name)
 
 def print_unread(device_ip):
     d = call_api(device_ip, '/api/monitoring/check-notifications')
