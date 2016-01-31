@@ -10,8 +10,8 @@ import math
 
 def to_size(size):
    if (size == 0):
-       return '0 B'
-   size_name = (' Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
+       return '0 Bytes'
+   size_name = ('Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
    i = int(math.floor(math.log(size,1024)))
    p = math.pow(1024,i)
    s = round(size/p,2)
@@ -68,7 +68,7 @@ def get_network_type(type):
     elif type == '3':
         result = 'EDGE (2.75G)'
     elif type == '4':
-        result = 'W-CDMA (3G)'
+        result = 'WCDMA (3G)'
     elif type == '5':
         result = 'HSDPA (3G)'
     elif type == '6':
