@@ -33,7 +33,11 @@ def is_hilink(device_ip):
     return True
 
 def call_api(device_ip, resource, xml_attribs=True):
-    r = requests.get(url='http://' + device_ip + resource, timeout=(2.0,2.0))
+    try:
+        r = requests.get(url='http://' + device_ip + resource, timeout=(2.0,2.0))
+    except requests.exceptions.RequestException as e:
+        print ("Error: "+str(e))
+        return False;
     if r.status_code == 200:
     	d = xmltodict.parse(r.text, xml_attribs=xml_attribs)
         if 'error' in d:
