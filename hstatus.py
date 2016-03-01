@@ -19,7 +19,12 @@ def to_size(size):
 
 
 def is_hilink(device_ip):
-    r = requests.get(url='http://' + device_ip + '/api/device/information', timeout=(2.0, 2.0))
+    try:
+        r = requests.get(url='http://' + device_ip + '/api/device/information', timeout=(2.0,2.0))
+    except requests.exceptions.RequestException as e:
+        print ("Error: "+str(e))
+        return False;
+        
     if r.status_code != 200:
         return False
     d = xmltodict.parse(r.text, xml_attribs=True)
@@ -28,20 +33,24 @@ def is_hilink(device_ip):
     return True
 
 def call_api(device_ip, resource, xml_attribs=True):
-    r = requests.get(ulr='http://' + device_ip + resource, timeout=(2.0, 2.0))
+    try:
+        r = requests.get(url='http://' + device_ip + resource, timeout=(2.0,2.0))
+    except requests.exceptions.RequestException as e:
+        print ("Error: "+str(e))
+        return False;
     if r.status_code == 200:
     	d = xmltodict.parse(r.text, xml_attribs=xml_attribs)
         if 'error' in d:
             raise Exception('Received error code ' + d['error']['code'] + ' for URL ' + r.url)
         return d
     else:
-      raise Exception('Received status code ' + str(r.status_code) + ' for URL ' + r.url)     
+      raise Exception('Received status code ' + str(r.status_code) + ' for URL ' + r.url)
 
 def get_connection_status(status):
     result = 'n/a'
     if status == '2' or status == '3' or status == '5' or status == '8' or status == '20' or status == '21' or status == '23' or status == '27' or status == '28' or status == '29' or status == '30' or status == '31' or status == '32' or status == '33':
         result = 'Connection failed, the profile is invalid'
-    elif status == '7' or status == '11' or status == '14' or status == '37': 
+    elif status == '7' or status == '11' or status == '14' or status == '37':
         result = 'Network access not allowed'
     elif status == '12' or status == '13':
         result = 'Connection failed, roaming not allowed'
@@ -185,7 +194,7 @@ def print_device_info(device_ip):
     product_family = d['response']['ProductFamily']
 
     print('Huawei ' + device_name + ' ' + product_family + ' Modem (IMEI: ' + imei + ')')
-    print('  Hardware version: ' + hardware_version) 
+    print('  Hardware version: ' + hardware_version)
     print('  Software version: ' + software_version)
     print('  Serial: ' + serial_number)
     print('  MAC address (modem): ' + mac_address1, end='')
@@ -222,4 +231,3 @@ print_provider(device_ip, connection_status)
 print_traffic_statistics(device_ip, connection_status)
 print_unread(device_ip)
 print('')
-
