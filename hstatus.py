@@ -19,7 +19,12 @@ def to_size(size):
 
 
 def is_hilink(device_ip):
-    r = requests.get(url='http://' + device_ip + '/api/device/information', timeout=(2.0,2.0))
+    try:
+        r = requests.get(url='http://' + device_ip + '/api/device/information', timeout=(2.0,2.0))
+    except requests.exceptions.RequestException as e:
+        print ("Error: "+str(e))
+        return False;
+        
     if r.status_code != 200:
         return False
     d = xmltodict.parse(r.text, xml_attribs=True)
