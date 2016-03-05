@@ -20,29 +20,44 @@ def to_size(size):
 
 def is_hilink(device_ip):
     try:
-        r = requests.get(url='http://' + device_ip + '/api/device/information', timeout=(2.0,2.0))
+        r = requests.get(url='http://' + device_ip + '/api/device/information', allow_redirects=False, timeout=(2.0,2.0))
     except requests.exceptions.RequestException as e:
-        print ("Error: "+str(e))
         return False;
-        
+
     if r.status_code != 200:
         return False
-    d = xmltodict.parse(r.text, xml_attribs=True)
-    if 'error' in d:
-        return False;
     return True
 
-def call_api(device_ip, resource, xml_attribs=True):
+def get_token(device_ip):
+    token = None
     try:
-        r = requests.get(url='http://' + device_ip + resource, timeout=(2.0,2.0))
+        r = requests.get(url='http://' + device_ip + '/api/webserver/token', allow_redirects=False, timeout=(2.0,2.0))
+    except requests.exceptions.RequestException as e:
+        return token
+    try:        
+        d = xmltodict.parse(r.text, xml_attribs=True)
+        if 'response' in d and 'token' in d['response']:
+            token = d['response']['token']
+    except:
+        pass
+    return token
+    
+
+def call_api(device_ip, token, resource, xml_attribs=True):
+    headers = {}
+    if token is not None:
+        headers = {'__RequestVerificationToken': token}
+    try:
+        r = requests.get(url='http://' + device_ip + resource, headers=headers, allow_redirects=False, timeout=(2.0,2.0))
     except requests.exceptions.RequestException as e:
         print ("Error: "+str(e))
         return False;
+
     if r.status_code == 200:
-    	d = xmltodict.parse(r.text, xml_attribs=xml_attribs)
+        d = xmltodict.parse(r.text, xml_attribs=xml_attribs)
         if 'error' in d:
             raise Exception('Received error code ' + d['error']['code'] + ' for URL ' + r.url)
-        return d
+        return d            
     else:
       raise Exception('Received status code ' + str(r.status_code) + ' for URL ' + r.url)
 
@@ -64,6 +79,8 @@ def get_connection_status(status):
         result = 'Disconnected'
     elif status == '903':
         result = 'Disconnecting'
+    elif status == '904':
+        result = 'Connection failed or disabled'
     return result
 
 def get_network_type(type):
@@ -109,7 +126,19 @@ def get_network_type(type):
     elif type == '19':
         result = 'LTE (4G)'
     elif type == '41':
-        result = '3G'
+        result = 'UMTS (3G)'
+    elif type == '44':
+        result = 'HSPA (3G)'
+    elif type == '45':
+        result = 'HSPA+ (3G)'
+    elif type == '46':
+        result = 'DC-HSPA+ (3G)'
+    elif type == '64':
+        result = 'HSPA (3G)'
+    elif type == '65':
+        result = 'HSPA+ (3G)'
+    elif type == '101':
+        result = 'LTE (4G)'
     return result
 
 def get_roaming_status(status):
@@ -134,8 +163,8 @@ def get_signal_level(level):
         result = '*****'
     return result
 
-def print_traffic_statistics(device_ip, connection_status):
-    d = call_api(device_ip, '/api/monitoring/traffic-statistics')
+def print_traffic_statistics(device_ip, token, connection_status):
+    d = call_api(device_ip, token, '/api/monitoring/traffic-statistics')
     current_connect_time = d['response']['CurrentConnectTime']
     current_upload = d['response']['CurrentUpload']
     current_download = d['response']['CurrentDownload']
@@ -149,8 +178,8 @@ def print_traffic_statistics(device_ip, connection_status):
     print('  Total downloaded: ' + to_size(float(total_download)))
     print('  Total uploaded: ' + to_size(float(total_upload)))
 
-def print_connection_status(device_ip):
-    d = call_api(device_ip, '/api/monitoring/status')
+def print_connection_status(device_ip, token):
+    d = call_api(device_ip, token, '/api/monitoring/status')
     connection_status = d['response']['ConnectionStatus']
     signal_strength = d['response']['SignalStrength']
     signal_level = d['response']['SignalIcon']
@@ -163,39 +192,46 @@ def print_connection_status(device_ip):
     wifi_users_current = d['response']['CurrentWifiUser']
     wifi_users_max = d['response']['TotalWifiUser']
 
-    r = requests.get('http://ip.o11.net')
-    public_ip = None
-    if r.status_code == 200:
-        public_ip = r.text.rstrip()
-
     print('  Connection status: ' + get_connection_status(connection_status))
+    public_ip = None
     if connection_status == '901':
+        r = requests.get('http://ip.o11.net', timeout=(2.0,2.0))
+        if r.status_code == 200:
+            public_ip = r.text.rstrip()
+
         print('    Network type: ' + get_network_type(network_type))
-        print('    Signal level: ' + get_signal_level(signal_level) + ' (' + signal_strength + '%)')
+        print('    Signal level: ' + get_signal_level(signal_level), end="")
+        if signal_strength is not None:
+            print(' (' + signal_strength + '%)')
+        else:
+            print('')
         print('    Roaming: ' + get_roaming_status(roaming_status))
-    if wan_ip is not None:
-        print('    Modem WAN IP address: ' +  wan_ip)
-    print('    Public IP address: ' + public_ip)
-    print('    DNS IP addresses: ' + primary_dns_ip + ', ' + secondary_dns_ip)
+        if wan_ip is not None:
+            print('    Modem WAN IP address: ' +  wan_ip)
+        if public_ip is not None:
+            print('    Public IP address: ' + public_ip)
+        print('    DNS IP addresses: ' + primary_dns_ip + ', ' + secondary_dns_ip)
     if wifi_status == '1':
         print('    WIFI users\t\t' + wifi_users_current + ' (of ' + wifi_users_max + ')')
 
     return connection_status
 
-def print_device_info(device_ip):
-    d = call_api(device_ip, '/api/device/information')
+def print_device_info(device_ip, token):
+    d = call_api(device_ip, token, '/api/device/information')
     device_name = d['response']['DeviceName']
     serial_number = d['response']['SerialNumber']
     imei = d['response']['Imei']
     hardware_version = d['response']['HardwareVersion']
     software_version = d['response']['SoftwareVersion']
+    webui_version = d['response']['WebUIVersion']
     mac_address1 = d['response']['MacAddress1']
     mac_address2 = d['response']['MacAddress2']
     product_family = d['response']['ProductFamily']
-
+ 
     print('Huawei ' + device_name + ' ' + product_family + ' Modem (IMEI: ' + imei + ')')
     print('  Hardware version: ' + hardware_version)
     print('  Software version: ' + software_version)
+    print('  Web UI version: ' + webui_version)
     print('  Serial: ' + serial_number)
     print('  MAC address (modem): ' + mac_address1, end='')
     if mac_address2 is not None:
@@ -203,15 +239,15 @@ def print_device_info(device_ip):
     else:
         print('')
 
-def print_provider(device_ip, connection_status):
-    d = call_api(device_ip, '/api/net/current-plmn')
-    state = d['response']['State']
-    provider_name = d['response']['FullName']
+def print_provider(device_ip, token, connection_status):
     if connection_status == '901':
+        d = call_api(device_ip, token, '/api/net/current-plmn')
+        state = d['response']['State']
+        provider_name = d['response']['FullName']
         print('    Network operator: ' + provider_name)
 
-def print_unread(device_ip):
-    d = call_api(device_ip, '/api/monitoring/check-notifications')
+def print_unread(device_ip, token):
+    d = call_api(device_ip, token, '/api/monitoring/check-notifications')
     unread_messages = d['response']['UnreadMessage']
     if unread_messages is not None and int(unread_messages) > 0:
         print('  Unread SMS: ' + unread_messages)
@@ -219,15 +255,23 @@ def print_unread(device_ip):
 device_ip = '192.168.1.1'
 if len(sys.argv) == 2:
     device_ip = sys.argv[1]
-  
-if not is_hilink(device_ip):
-    print("Can't find a Huawei HiLink device on " + device_ip)
-    print('')
-    sys.exit(-1)
+    if not is_hilink(device_ip):
+        print("Can't find a Huawei HiLink device on " + device_ip)
+        print('')
+        sys.exit(-1)
+else:
+    if not is_hilink(device_ip):
+        if not is_hilink('192.168.8.1'):
+            print("Can't find a Huawei HiLink device on the default IP addresses, please try again and pass the device's IP address as a parameter")
+            print('')
+            sys.exit(-1)
+        else:
+            device_ip = '192.168.8.1'
 
-print_device_info(device_ip)
-connection_status = print_connection_status(device_ip)
-print_provider(device_ip, connection_status)
-print_traffic_statistics(device_ip, connection_status)
-print_unread(device_ip)
+token = get_token(device_ip)
+print_device_info(device_ip, token)
+connection_status = print_connection_status(device_ip, token)
+print_provider(device_ip, connection_status, token)
+print_traffic_statistics(device_ip, connection_status, token)
+print_unread(device_ip, token)
 print('')
