@@ -17,6 +17,7 @@ $ python ./hstatus.py
 Huawei E3276 LTE Modem (IMEI: 861711012616361)
   Hardware version: CH2F4276GM
   Software version: 22.250.04.00.186
+  Web UI version: 22.100.05.00.03
   Serial: B3A3TC2313833197
   MAC address (modem): 00:0D:87:22:34:AC
   Connection status: Connected
