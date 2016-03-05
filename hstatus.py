@@ -152,15 +152,15 @@ def get_roaming_status(status):
 def get_signal_level(level):
     result = '-'
     if level == '1':
-        result = '*'
+        result = u'\u2581'
     if level == '2':
-        result = '**'
+        result = u'\u2581' + u'\u2583'
     if level == '3':
-        result = '***'
+        result = u'\u2581' + u'\u2583' + u'\u2584'
     if level == '4':
-        result = '****'
+        result = u'\u2581' + u'\u2583' + u'\u2584' + u'\u2586'
     if level == '5':
-        result = '*****'
+        result = u'\u2581' + u'\u2583' + u'\u2584' + u'\u2586' + u'\u2588'
     return result
 
 def print_traffic_statistics(device_ip, token, connection_status):
